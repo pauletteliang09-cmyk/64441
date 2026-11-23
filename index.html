@@ -150,7 +150,7 @@ body.idle #ui,body.idle #help{opacity:0;pointer-events:none}
 #ui button:hover{background:#fff}
 #ui .cnt{color:#fff;font-size:12px;letter-spacing:.1em;margin-right:4px;opacity:.85}
 #prog{position:fixed;left:0;top:0;height:3px;background:var(--sky);z-index:21;transition:width .4s}
-#help{position:fixed;left:50%;transform:translateX(-50%);bottom:40px;color:#fff;background:rgba(19,37,74,.85);padding:6px 14px;border-radius:999px;font-size:12px;z-index:20;letter-spacing:.04em;transition:opacity .4s}
+#help{position:fixed;left:16px;bottom:40px;color:#fff;background:rgba(19,37,74,.85);padding:6px 14px;border-radius:999px;font-size:12px;z-index:20;letter-spacing:.04em;transition:opacity .4s}
 #overview{position:fixed;inset:0;background:rgba(10,20,40,.96);z-index:30;display:none;overflow:auto;padding:30px}
 #overview.on{display:block}
 #overview .g{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;max-width:1400px;margin:0 auto}
@@ -1074,12 +1074,13 @@ document.querySelectorAll('.acc .q').forEach(q=>q.onclick=()=>{const a=q.parentE
 #ink{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:8;pointer-events:none;touch-action:none}
 body.drawing #ink{pointer-events:auto;cursor:crosshair}
 body.drawing.erasing #ink{cursor:cell}
-#pal{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:25;display:none;gap:6px;align-items:center;background:rgba(19,37,74,.95);padding:7px 10px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#pal{position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:6px;align-items:stretch;background:rgba(19,37,74,.96);padding:10px 8px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
 body.drawing #pal{display:flex}
 #pal button{height:32px;min-width:32px;border-radius:999px;border:2px solid transparent;background:rgba(255,255,255,.1);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:6px}
 #pal button.on{border-color:#E0A526;background:rgba(255,255,255,.2)}
 #pal .sw{width:16px;height:16px;border-radius:50%;display:inline-block;border:2px solid #fff}
-#pal .sep{width:1px;height:22px;background:rgba(255,255,255,.25);margin:0 3px}
+#pal .sep{height:1px;width:100%;background:rgba(255,255,255,.25);margin:3px 0}
+#pal button{justify-content:flex-start;width:112px;height:36px!important}
 #notesPanel{position:fixed;left:0;right:0;bottom:0;z-index:24;background:rgba(19,37,74,.97);color:#fff;display:none;padding:14px 22px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.35);font-family:Inter,sans-serif}
 body.notes-on #notesPanel{display:block}
 #notesPanel .top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
@@ -1092,11 +1093,11 @@ body.notes-on #notesPanel{display:block}
 .ntext:focus{border-color:#E0A526;background:rgba(255,255,255,.06)}
 .nhint{font-size:11.5px;color:#B9CBEA;margin-top:6px}
 #notesPanel b,#pv b{color:#fff}
-.sticky .bar span{background:none;color:#8A6100}
+.sticky .stbar span{color:#8A6100}
 .clock{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;color:#E0A526}
 .sticky{position:absolute;width:230px;z-index:7;background:#FFF6E2;border:1.5px solid #E0A526;border-radius:10px;box-shadow:0 8px 22px rgba(19,37,74,.25);font-family:Inter,sans-serif}
-.sticky .bar{cursor:move;display:flex;align-items:center;justify-content:space-between;padding:5px 8px 4px 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#8A6100;border-bottom:1px dashed #E0A526;user-select:none}
-.sticky .bar button{border:none;background:none;cursor:pointer;font-size:16px;line-height:1;color:#8A6100;padding:0 2px}
+.sticky .stbar{cursor:move;display:flex;align-items:center;justify-content:space-between;padding:5px 8px 4px 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#8A6100;border-bottom:1px dashed #E0A526;user-select:none}
+.sticky .stbar button{border:none;background:none;cursor:pointer;font-size:16px;line-height:1;color:#8A6100;padding:0 2px}
 .sticky textarea{width:100%;min-height:96px;border:none;background:transparent;resize:vertical;padding:8px 10px;font:500 15px/1.4 Inter,sans-serif;color:#16213B;outline:none}
 /* presenter window */
 #pv{display:none}
@@ -1114,12 +1115,12 @@ body.presenter #ui,body.presenter #help,body.presenter #prog,body.presenter #pal
 
 <div id="pal">
   <button data-tool="pen" data-color="#1E386B" class="on" title="Navy pen"><span class="sw" style="background:#1E386B"></span>Pen</button>
-  <button data-tool="pen" data-color="#C0392B" title="Red pen"><span class="sw" style="background:#C0392B"></span></button>
-  <button data-tool="pen" data-color="#1F8A5B" title="Green pen"><span class="sw" style="background:#1F8A5B"></span></button>
+  <button data-tool="pen" data-color="#C0392B" title="Red pen"><span class="sw" style="background:#C0392B"></span>Red</button>
+  <button data-tool="pen" data-color="#1F8A5B" title="Green pen"><span class="sw" style="background:#1F8A5B"></span>Green</button>
   <button data-tool="hl" data-color="#E0A526" title="Highlighter (H)"><span class="sw" style="background:#E0A526"></span>Highlight</button>
   <span class="sep"></span>
-  <button data-tool="eraser" title="Eraser (E)">Eraser</button>
-  <button id="inkClear" title="Clear this slide (C)">Clear slide</button>
+  <button data-tool="eraser" title="Eraser (E)">⌫ Eraser</button>
+  <button id="inkClear" title="Clear this slide (C)">✕ Clear slide</button>
   <span class="sep"></span>
   <button id="inkDone" title="Stop drawing (P or Esc)">Done ✓</button>
 </div>
@@ -1203,10 +1204,10 @@ document.getElementById('inkClear').onclick=clearInk;document.getElementById('in
 let stk={};try{stk=JSON.parse(LS.get('p64441-sticky')||'{}')||{}}catch(e){stk={}}
 const saveStk=()=>LS.set('p64441-sticky',JSON.stringify(stk));
 function makeSticky(i,n){const d=n;const el=document.createElement('div');el.className='sticky';el.style.left=d.x+'px';el.style.top=d.y+'px';
-  el.innerHTML='<div class="bar"><span>NOTE</span><button title="Delete note">×</button></div><textarea placeholder="Type a note…"></textarea>';
+  el.innerHTML='<div class="stbar"><span>NOTE</span><button title="Delete note">×</button></div><textarea placeholder="Type a note…"></textarea>';
   const ta=el.querySelector('textarea');ta.value=d.text||'';ta.oninput=()=>{d.text=ta.value;saveStk();};
   el.querySelector('button').onclick=()=>{stk[i]=(stk[i]||[]).filter(x=>x!==d);saveStk();el.remove();};
-  const bar=el.querySelector('.bar');bar.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;e.preventDefault();bar.setPointerCapture(e.pointerId);const r=stage.getBoundingClientRect(),k=r.width/1280,sx=e.clientX,sy=e.clientY,ox=d.x,oy=d.y;
+  const bar=el.querySelector('.stbar');bar.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;e.preventDefault();bar.setPointerCapture(e.pointerId);const r=stage.getBoundingClientRect(),k=r.width/1280,sx=e.clientX,sy=e.clientY,ox=d.x,oy=d.y;
     const mv=ev=>{d.x=Math.max(0,Math.min(1280-230,ox+(ev.clientX-sx)/k));d.y=Math.max(58,Math.min(720-80,oy+(ev.clientY-sy)/k));el.style.left=d.x+'px';el.style.top=d.y+'px';};
     const up=()=>{bar.removeEventListener('pointermove',mv);bar.removeEventListener('pointerup',up);saveStk();};bar.addEventListener('pointermove',mv);bar.addEventListener('pointerup',up);});
   slides[i].appendChild(el);return ta;}
