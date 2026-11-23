@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0E1B36;font-family:Inter,"Helvetica Neue",Arial,sans-serif;color:var(--ink);overflow:hidden}
 #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-#stage{width:1280px;height:720px;position:relative;transform-origin:center center;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;overflow:clip}
+#stage{width:1280px;height:720px;flex:none;position:relative;transform-origin:center center;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;overflow:clip}
 .slide{position:absolute;inset:0;background:#fff;overflow:hidden;overflow:clip;opacity:0;visibility:hidden;transition:opacity .45s ease, transform .45s ease;transform:translateX(30px)}
 .slide.active{opacity:1;visibility:visible;transform:none}
 .slide.prev{transform:translateX(-30px)}
@@ -878,11 +878,12 @@ input[type=range]{width:100%;accent-color:var(--navy)}
 
 </div></div>
 <div id="ui"><span class="cnt" id="cnt">1 / 31</span><button id="bOv" title="Overview (O)">▦</button><button id="bPrev" title="Previous (←)">‹</button><button id="bNext" title="Next (→)">›</button><button id="bFs" title="Full screen (F)">⤢</button></div>
-<div id="help">← → to navigate · O overview · F full screen</div>
+<div id="help">← → navigate · O overview · F full screen · P pen · N notes · S sticky note · V presenter view</div>
 <div id="overview"><h3>ALL SLIDES</h3><div class="g" id="ovg"></div></div>
 
 <script>
 (function(){
+window.P64441_PRESENTER=/presenter/.test(location.hash);
 const slides=[...document.querySelectorAll('.slide')];
 const N=slides.length;let cur=0;
 const stage=document.getElementById('stage');
@@ -891,7 +892,7 @@ addEventListener('resize',fit);fit();
 slides.forEach((s,i)=>{const p=s.querySelector('.pg');if(p)p.textContent=(i+1)+' / '+N;});
 function go(i){i=Math.max(0,Math.min(N-1,i));slides.forEach((s,k)=>{s.classList.toggle('active',k===i);s.classList.toggle('prev',k<i);});cur=i;
   document.getElementById('cnt').textContent=(i+1)+' / '+N;document.getElementById('prog').style.width=((i+1)/N*100)+'%';
-  try{history.replaceState(null,'','#slide-'+(i+1));}catch(e){}
+  if(!window.P64441_PRESENTER){try{history.replaceState(null,'','#slide-'+(i+1));}catch(e){}}
   slides[i].dispatchEvent(new Event('enter'));}
 window.goSlide=go;
 function next(){go(cur+1)} function prev(){go(cur-1)}
@@ -902,7 +903,7 @@ const ov=document.getElementById('overview'),ovg=document.getElementById('ovg');
 slides.forEach((s,i)=>{const d=document.createElement('div');d.className='th';d.innerHTML='<div class="n">'+String(i+1).padStart(2,'0')+'</div><div class="x">'+s.dataset.title+'</div>';d.onclick=()=>{go(i);ov.classList.remove('on')};ovg.appendChild(d);});
 function toggleOv(){ov.classList.toggle('on');[...ovg.children].forEach((c,i)=>c.classList.toggle('cur',i===cur));}
 document.getElementById('bOv').onclick=toggleOv;
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key;
+addEventListener('keydown',e=>{const tg=e.target;if(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
   if(['ArrowRight','PageDown',' '].includes(k)){e.preventDefault();next();}
   else if(['ArrowLeft','PageUp'].includes(k)){e.preventDefault();prev();}
   else if(k==='Home')go(0);else if(k==='End')go(N-1);
@@ -1068,5 +1069,196 @@ cks.forEach(c=>c.onclick=()=>{c.classList.toggle('on');ckN();});ckN();
 document.querySelectorAll('.acc .q').forEach(q=>q.onclick=()=>{const a=q.parentElement,col=a.parentElement;const was=a.classList.contains('on');col.querySelectorAll('.acc').forEach(x=>x.classList.remove('on'));if(!was)a.classList.add('on');});
 })();
 </script>
+<!-- ================= PRESENTER TOOLS: pen, speaker notes, presenter view, sticky notes ================= -->
+<style>
+#ink{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:8;pointer-events:none;touch-action:none}
+body.drawing #ink{pointer-events:auto;cursor:crosshair}
+body.drawing.erasing #ink{cursor:cell}
+#pal{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:25;display:none;gap:6px;align-items:center;background:rgba(19,37,74,.95);padding:7px 10px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+body.drawing #pal{display:flex}
+#pal button{height:32px;min-width:32px;border-radius:999px;border:2px solid transparent;background:rgba(255,255,255,.1);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:6px}
+#pal button.on{border-color:#E0A526;background:rgba(255,255,255,.2)}
+#pal .sw{width:16px;height:16px;border-radius:50%;display:inline-block;border:2px solid #fff}
+#pal .sep{width:1px;height:22px;background:rgba(255,255,255,.25);margin:0 3px}
+#notesPanel{position:fixed;left:0;right:0;bottom:0;z-index:24;background:rgba(19,37,74,.97);color:#fff;display:none;padding:14px 22px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.35);font-family:Inter,sans-serif}
+body.notes-on #notesPanel{display:block}
+#notesPanel .top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+#notesPanel .lbl{font-size:11px;letter-spacing:.14em;font-weight:700;color:#B9CBEA}
+#notesPanel .ttl{font-weight:700;font-size:15px}
+#notesPanel .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+#notesPanel button,#pv button{cursor:pointer;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;font:600 12.5px Inter,sans-serif;padding:6px 12px;border-radius:8px}
+#notesPanel button:hover,#pv button:hover{background:rgba(255,255,255,.15)}
+.ntext{font-size:16px;line-height:1.55;max-height:150px;overflow:auto;outline:none;padding:8px 10px;border-radius:8px;border:1px dashed rgba(255,255,255,.25);white-space:pre-wrap}
+.ntext:focus{border-color:#E0A526;background:rgba(255,255,255,.06)}
+.nhint{font-size:11.5px;color:#B9CBEA;margin-top:6px}
+#notesPanel b,#pv b{color:#fff}
+.sticky .bar span{background:none;color:#8A6100}
+.clock{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;color:#E0A526}
+.sticky{position:absolute;width:230px;z-index:7;background:#FFF6E2;border:1.5px solid #E0A526;border-radius:10px;box-shadow:0 8px 22px rgba(19,37,74,.25);font-family:Inter,sans-serif}
+.sticky .bar{cursor:move;display:flex;align-items:center;justify-content:space-between;padding:5px 8px 4px 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#8A6100;border-bottom:1px dashed #E0A526;user-select:none}
+.sticky .bar button{border:none;background:none;cursor:pointer;font-size:16px;line-height:1;color:#8A6100;padding:0 2px}
+.sticky textarea{width:100%;min-height:96px;border:none;background:transparent;resize:vertical;padding:8px 10px;font:500 15px/1.4 Inter,sans-serif;color:#16213B;outline:none}
+/* presenter window */
+#pv{display:none}
+body.presenter{background:#0E1B36}
+body.presenter #pv{display:grid;position:fixed;inset:0;grid-template-columns:62% 38%;grid-template-rows:64px 1fr;color:#fff;font-family:Inter,sans-serif;z-index:30;pointer-events:none}
+body.presenter #pv>*{pointer-events:auto}
+body.presenter #viewport{right:38%;top:64px;bottom:150px}
+body.presenter #ui,body.presenter #help,body.presenter #prog,body.presenter #pal,body.presenter #notesPanel{display:none!important}
+#pv .hd{grid-column:1/3;display:flex;align-items:center;gap:18px;padding:0 22px;background:#13254A;border-bottom:1px solid rgba(255,255,255,.12)}
+#pv .hd .clock{font-size:26px}
+#pv .side{grid-column:2;grid-row:2;padding:18px 22px;overflow:auto;border-left:1px solid rgba(255,255,255,.12);background:#152A55}
+#pv .nextbox{position:fixed;left:0;width:62%;bottom:0;height:150px;padding:14px 22px;display:flex;gap:14px;align-items:center;background:#13254A;border-top:1px solid rgba(255,255,255,.12)}
+#pv .ntext{max-height:none;min-height:300px;font-size:19px}
+</style>
+
+<div id="pal">
+  <button data-tool="pen" data-color="#1E386B" class="on" title="Navy pen"><span class="sw" style="background:#1E386B"></span>Pen</button>
+  <button data-tool="pen" data-color="#C0392B" title="Red pen"><span class="sw" style="background:#C0392B"></span></button>
+  <button data-tool="pen" data-color="#1F8A5B" title="Green pen"><span class="sw" style="background:#1F8A5B"></span></button>
+  <button data-tool="hl" data-color="#E0A526" title="Highlighter (H)"><span class="sw" style="background:#E0A526"></span>Highlight</button>
+  <span class="sep"></span>
+  <button data-tool="eraser" title="Eraser (E)">Eraser</button>
+  <button id="inkClear" title="Clear this slide (C)">Clear slide</button>
+  <span class="sep"></span>
+  <button id="inkDone" title="Stop drawing (P or Esc)">Done ✓</button>
+</div>
+
+<div id="notesPanel">
+  <div class="top"><span class="lbl">SPEAKER NOTES</span><span class="ttl" id="npTitle"></span>
+    <div class="sp"><span class="clock" id="npClock">00:00</span><button id="npTimer">Start timer</button><button id="npPresenter">Open presenter window</button><button id="npClose">Close (N)</button></div></div>
+  <div class="ntext" id="npText" contenteditable="true" spellcheck="false"></div>
+  <div class="nhint">Click the text to edit your notes; changes are saved in this browser. On a projector, use <b>Open presenter window</b> and drag it to your laptop screen so students don’t see the notes.</div>
+</div>
+
+<div id="pv">
+  <div class="hd"><b style="letter-spacing:.12em;font-size:13px;color:#B9CBEA">PRESENTER VIEW</b><span id="pvCount" style="font-weight:700"></span><span style="flex:1"></span><span class="clock" id="pvClock">00:00</span><button id="pvTimer">Start timer</button><button id="pvReset">Reset</button></div>
+  <div class="side"><div class="lbl" style="font-size:11px;letter-spacing:.14em;font-weight:700;color:#B9CBEA;margin-bottom:6px">NOTES · <span id="pvTitle"></span></div><div class="ntext" id="pvText" contenteditable="true" spellcheck="false"></div><div class="nhint">Edits are saved and shared with the main window.</div></div>
+  <div class="nextbox"><button id="pvPrev" style="font-size:18px;padding:12px 18px">‹ Prev</button><div style="flex:1"><div style="font-size:11px;letter-spacing:.14em;font-weight:700;color:#B9CBEA">NEXT SLIDE</div><div id="pvNext" style="font-size:20px;font-weight:700;margin-top:4px"></div></div><button id="pvNextBtn" style="font-size:18px;padding:12px 18px;background:#E0A526;color:#13254A;border-color:#E0A526">Next ›</button></div>
+</div>
+
+<script>
+(function(){
+const NOTES=[
+"Welcome (1 min). Today: what the Research Methods final exam looks like, what it tests, three worked examples, how to prepare, and your questions. Exam: Monday 7 December 2026.",
+"Agenda (1 min). Four parts. Most time goes to the worked examples, because that is where students learn most about how to answer.",
+"Part 1 (about 15 minutes): the exam itself.",
+"Exam facts (3 min). Source: unit handbook 2026-27 and the Canvas 'Exam: Key Info' page. Stress: closed book, AI prohibited, bring phone with Duo Mobile and student ID.",
+"Time management (2 min). Four equal questions → equal time. Inside each 30 minutes: plan 5, write 22, check 3. The exam is half of the unit mark.",
+"What is tested (3 min). Three directly examinable topics. The handbook says the exam evaluates qualitative and quantitative methods and analysis, and what they mean for data collection and analysis. Key message: application, not memory.",
+"Lecture map (2 min). Directly examinable: W2 design & ethics, W4 qualitative methods, W5 quantitative methods, W7 qualitative analysis, W8 quantitative analysis. W3 literature review was the coursework. Attend the W10 revision workshop.",
+"Self-check (3 min). Ask students to explain each term in one sentence before clicking it. Do one tab live, then let them try the others.",
+"Comparison (3 min). Many questions ask students to choose or compare. Click 'Show example study': same topic, two different research questions.",
+"Question map (2 min). 20 practice questions from Canvas, grouped by topic. They are NOT the real exam questions. Quantitative is the largest group (9 of 20).",
+"Command words (3 min). Click through Explain, Outline, Discuss. Key point: even 'name' and 'give' questions add 'briefly explain why' — always justify.",
+"Answer formula (3 min). Click P, E, A, J to build the Q7 example sentence by sentence. Grade descriptors are from the handbook (simplified).",
+"Part 2 (about 30 minutes, ~10 minutes per example).",
+"Example 1 decode (3 min). Ask students to find the command word, number, topic, context and second task BEFORE clicking 'Decode the question'.",
+"Example 1 illustration (3 min). Six principles from the Week 2 lecture; the three used are dark. Click each card to flip from problem to solution.",
+"Example 1 model answer (4 min). Read aloud. Point out signposts, the online context, a solution for every issue, and the ethics approval step.",
+"Example 2 decode (3 min). 'Outline' = steps in order, briefly. The method is given. Contrast with Q12: content analysis = counting.",
+"Example 2 illustration (4 min). Press Play, or click each step. Follow quotes → codes → themes. Quotes are invented examples for teaching.",
+"Example 2 model answer (3 min). Each step = action + pop-up example. Mention focus-group interaction.",
+"Example 3 decode (2 min). 'Briefly' + 'plain language' = short, no jargon. Three numbers to translate, plus the direction.",
+"Example 3 illustration (4 min). Move the slider: each +1 point of concern → £5.20 less. Only b comes from the question; the rest is illustrative.",
+"Example 3 model answer (3 min). One sentence per number. Read the common mistakes aloud — they are very frequent.",
+"Summary (2 min). The same five habits work for every question type.",
+"Practice (5 min). Start the 2-minute timer. Students write a P-E-A-J plan, then reveal the answer plan. Accept other well-justified choices.",
+"Part 3 (about 10 minutes): how to prepare.",
+"Revision plan (3 min). Week 9 = learn one topic every two days. Week 10 = timed, typed practice. Attend the Week 10 revision workshop.",
+"Dos and don'ts (3 min). This is the conclusion: how to prepare and how to write.",
+"Exam-day checklist (2 min). Click to tick live. From the Exam Key Info page: phone for Duo Mobile log-in and student ID card.",
+"Part 4 (about 5 minutes): FAQ.",
+"FAQ (4 min). Answer length and references are our advice, not official rules. Invite students' own questions.",
+"Thank you and Q&A. Remind: exam Monday 7 December; bring phone and student ID. Scan the QR code to contact Phoenix EDU."];
+const slides=[...document.querySelectorAll('#stage .slide')];const N=slides.length;
+const isPresenter=!!window.P64441_PRESENTER;
+let cur=Math.max(0,slides.findIndex(s=>s.classList.contains('active')));
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const noteOf=i=>{const v=LS.get('p64441-note-'+i);return v!==null?v:(NOTES[i]||'')};
+const titleOf=i=>slides[i]?slides[i].dataset.title:'';
+
+/* ---------- pen / highlighter ---------- */
+const stage=document.getElementById('stage');
+const cv=document.createElement('canvas');cv.id='ink';cv.width=2560;cv.height=1440;stage.appendChild(cv);
+const ctx=cv.getContext('2d');ctx.scale(2,2);ctx.lineCap='round';ctx.lineJoin='round';
+let ink={};try{ink=JSON.parse(LS.get('p64441-ink')||'{}')||{}}catch(e){ink={}}
+let tool='pen',color='#1E386B',drawing=false,stroke=null;
+function save(){LS.set('p64441-ink',JSON.stringify(ink))}
+function redraw(){ctx.clearRect(0,0,1280,720);(ink[cur]||[]).forEach(s=>{if(s.p.length<1)return;ctx.globalAlpha=s.t==='hl'?.35:1;ctx.strokeStyle=s.c;ctx.lineWidth=s.t==='hl'?22:4;ctx.beginPath();ctx.moveTo(s.p[0][0],s.p[0][1]);s.p.forEach(q=>ctx.lineTo(q[0],q[1]));if(s.p.length===1)ctx.lineTo(s.p[0][0]+.1,s.p[0][1]);ctx.stroke();});ctx.globalAlpha=1;}
+function pt(e){const r=stage.getBoundingClientRect();return[Math.round((e.clientX-r.left)/r.width*1280),Math.round((e.clientY-r.top)/r.height*720)]}
+function eraseAt(p){const L=ink[cur]||[];const keep=L.filter(s=>!s.p.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<14));if(keep.length!==L.length){ink[cur]=keep;redraw();save();}}
+cv.addEventListener('pointerdown',e=>{if(!document.body.classList.contains('drawing'))return;e.preventDefault();cv.setPointerCapture(e.pointerId);drawing=true;const p=pt(e);
+  if(tool==='eraser'){eraseAt(p);return;}stroke={t:tool,c:color,p:[p]};(ink[cur]=ink[cur]||[]).push(stroke);redraw();});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e);if(tool==='eraser'){eraseAt(p);return;}stroke.p.push(p);redraw();});
+const endDraw=()=>{if(drawing){drawing=false;stroke=null;save();}};cv.addEventListener('pointerup',endDraw);cv.addEventListener('pointercancel',endDraw);
+const pal=document.getElementById('pal');
+function setTool(t,c){tool=t;if(c)color=c;document.body.classList.toggle('erasing',t==='eraser');pal.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t&&(t==='eraser'||b.dataset.color===color)));}
+pal.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool,b.dataset.color));
+function penMode(on){document.body.classList.toggle('drawing',on===undefined?!document.body.classList.contains('drawing'):on);}
+function clearInk(){ink[cur]=[];redraw();save();}
+document.getElementById('inkClear').onclick=clearInk;document.getElementById('inkDone').onclick=()=>penMode(false);
+
+/* ---------- sticky notes ---------- */
+let stk={};try{stk=JSON.parse(LS.get('p64441-sticky')||'{}')||{}}catch(e){stk={}}
+const saveStk=()=>LS.set('p64441-sticky',JSON.stringify(stk));
+function makeSticky(i,n){const d=n;const el=document.createElement('div');el.className='sticky';el.style.left=d.x+'px';el.style.top=d.y+'px';
+  el.innerHTML='<div class="bar"><span>NOTE</span><button title="Delete note">×</button></div><textarea placeholder="Type a note…"></textarea>';
+  const ta=el.querySelector('textarea');ta.value=d.text||'';ta.oninput=()=>{d.text=ta.value;saveStk();};
+  el.querySelector('button').onclick=()=>{stk[i]=(stk[i]||[]).filter(x=>x!==d);saveStk();el.remove();};
+  const bar=el.querySelector('.bar');bar.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;e.preventDefault();bar.setPointerCapture(e.pointerId);const r=stage.getBoundingClientRect(),k=r.width/1280,sx=e.clientX,sy=e.clientY,ox=d.x,oy=d.y;
+    const mv=ev=>{d.x=Math.max(0,Math.min(1280-230,ox+(ev.clientX-sx)/k));d.y=Math.max(58,Math.min(720-80,oy+(ev.clientY-sy)/k));el.style.left=d.x+'px';el.style.top=d.y+'px';};
+    const up=()=>{bar.removeEventListener('pointermove',mv);bar.removeEventListener('pointerup',up);saveStk();};bar.addEventListener('pointermove',mv);bar.addEventListener('pointerup',up);});
+  slides[i].appendChild(el);return ta;}
+Object.keys(stk).forEach(i=>(stk[i]||[]).forEach(n=>{if(slides[i])makeSticky(+i,n)}));
+function addSticky(){const L=stk[cur]=stk[cur]||[];const n={x:960-L.length*18,y:110+L.length*18,text:''};L.push(n);saveStk();makeSticky(cur,n).focus();}
+
+/* ---------- speaker notes + timer ---------- */
+let t0=null,acc=0,tick=null;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function showClock(){const s=Math.floor((acc+(t0?Date.now()-t0:0))/1000);document.querySelectorAll('#npClock,#pvClock').forEach(c=>c.textContent=fmt(s));}
+function toggleTimer(){if(t0){acc+=Date.now()-t0;t0=null;clearInterval(tick);}else{t0=Date.now();tick=setInterval(showClock,500);}document.querySelectorAll('#npTimer,#pvTimer').forEach(b=>b.textContent=t0?'Pause timer':'Start timer');}
+document.getElementById('npTimer').onclick=toggleTimer;document.getElementById('pvTimer').onclick=toggleTimer;
+document.getElementById('pvReset').onclick=()=>{acc=0;if(t0)t0=Date.now();showClock();};
+const npText=document.getElementById('npText'),pvText=document.getElementById('pvText');
+function renderNotes(){document.getElementById('npTitle').textContent=(cur+1)+' / '+N+' · '+titleOf(cur);npText.textContent=noteOf(cur);
+  document.getElementById('pvTitle').textContent=titleOf(cur);document.getElementById('pvCount').textContent='Slide '+(cur+1)+' / '+N;pvText.textContent=noteOf(cur);
+  document.getElementById('pvNext').textContent=cur<N-1?(cur+2)+' · '+titleOf(cur+1):'— End of presentation —';}
+function editNote(el){LS.set('p64441-note-'+cur,el.innerText);sendPeer({type:'note',i:cur,text:el.innerText});}
+npText.addEventListener('input',()=>editNote(npText));pvText.addEventListener('input',()=>editNote(pvText));
+document.getElementById('npClose').onclick=()=>document.body.classList.remove('notes-on');
+
+/* ---------- presenter window (postMessage sync) ---------- */
+let peer=null;
+function sendPeer(m){try{if(peer&&!peer.closed)peer.postMessage(Object.assign({p64441:1},m),'*');}catch(e){}}
+function openPresenter(){try{peer=window.open(location.href.split('#')[0]+'#presenter','p64441presenter','width=1200,height=760');}catch(e){peer=null}
+  if(!peer){document.body.classList.add('notes-on');const h=document.querySelector('#notesPanel .nhint');h.innerHTML='<b>The presenter window could not open here</b> (pop-ups blocked or the page is shown inside another app). Open the page on its own: the GitHub Pages link or the .html file from your Desktop.';return;}
+  setTimeout(()=>sendPeer({type:'slide',i:cur}),800);}
+document.getElementById('npPresenter').onclick=openPresenter;
+if(isPresenter){peer=window.opener;document.body.classList.add('presenter');
+  const fitP=()=>{const vp=document.getElementById('viewport').getBoundingClientRect();const s=Math.min(vp.width/1280,vp.height/720)*.96;stage.style.transform='scale('+s+')';};
+  addEventListener('resize',()=>setTimeout(fitP,0));setTimeout(fitP,0);
+  document.getElementById('pvPrev').onclick=()=>{goSlide(cur-1);};document.getElementById('pvNextBtn').onclick=()=>{goSlide(cur+1);};
+  document.title='Presenter view · '+document.title;}
+let remote=false;
+addEventListener('message',e=>{const m=e.data;if(!m||!m.p64441)return;if(!peer&&e.source)peer=e.source;
+  if(m.type==='slide'&&m.i!==cur){remote=true;goSlide(m.i);remote=false;}
+  if(m.type==='note'){LS.set('p64441-note-'+m.i,m.text);if(m.i===cur){if(document.activeElement!==npText)npText.textContent=m.text;if(document.activeElement!==pvText)pvText.textContent=m.text;}}});
+
+/* ---------- slide change hook ---------- */
+slides.forEach((s,i)=>s.addEventListener('enter',()=>{cur=i;redraw();renderNotes();if(!remote)sendPeer({type:'slide',i});}));
+redraw();renderNotes();
+
+/* ---------- toolbar buttons + keys ---------- */
+const ui=document.getElementById('ui');
+const mk=(txt,title,fn)=>{const b=document.createElement('button');b.textContent=txt;b.title=title;b.onclick=fn;ui.insertBefore(b,document.getElementById('bOv'));return b;};
+mk('✎','Pen (P)',()=>penMode());mk('▤','Speaker notes (N)',()=>document.body.classList.toggle('notes-on'));mk('✚','Sticky note (S)',addSticky);mk('⧉','Presenter window (V)',openPresenter);
+addEventListener('keydown',e=>{const tg=e.target;if(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();
+  if(k==='p')penMode();else if(k==='h'){penMode(true);setTool('hl','#E0A526');}else if(k==='e'&&document.body.classList.contains('drawing'))setTool('eraser');
+  else if(k==='c'&&document.body.classList.contains('drawing'))clearInk();else if(k==='n'&&!isPresenter)document.body.classList.toggle('notes-on');
+  else if(k==='s'){e.preventDefault();addSticky();}else if(k==='v'&&!isPresenter)openPresenter();else if(k==='escape')penMode(false);});
+})();
+</script>
+
 </body>
 </html>
