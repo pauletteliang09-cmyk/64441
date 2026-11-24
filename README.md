@@ -14,3 +14,6 @@ Interactive open-lecture slides by Phoenix EDU: what the final exam looks like, 
 | S | Add a sticky note to the current slide |
 
 Drawings, sticky notes and edited speaker notes are saved in your own browser only.
+
+## Access
+The page is password-protected: the slides are encrypted (AES-256-GCM, key derived from the password with PBKDF2-SHA256, 600,000 iterations) and are decrypted in the browser only after the correct password is entered. The password is not stored in this repository.
