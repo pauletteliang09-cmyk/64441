@@ -15,5 +15,13 @@ Interactive open-lecture slides by Phoenix EDU: what the final exam looks like, 
 
 Drawings, sticky notes and edited speaker notes are saved in your own browser only.
 
+## Formal revision pages
+| File | Content |
+|---|---|
+| `index.html` | Open lecture: final exam overview |
+| `topic-a-research-design-ethics.html` | Topic A: Research Design & Ethics + Qualitative vs Quantitative. Lecture definitions, plain-language explanations, how it is tested, and worked answers to practice questions Q1, Q2, Q3, Q4, Q5, Q7 |
+
+Each revision page has a "Cover definitions" self-test mode, show/hide model answers, flashcards, a one-page memory sheet and print-to-PDF.
+
 ## Access
 The page is password-protected: the slides are encrypted (AES-256-GCM, key derived from the password with PBKDF2-SHA256, 600,000 iterations) and are decrypted in the browser only after the correct password is entered. The password is not stored in this repository.
