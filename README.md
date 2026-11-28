@@ -20,6 +20,7 @@ Drawings, sticky notes and edited speaker notes are saved in your own browser on
 |---|---|
 | `index.html` | Open lecture: final exam overview |
 | `topic-a-research-design-ethics.html` | Topic A: Research Design & Ethics + Qualitative vs Quantitative. Lecture definitions, plain-language explanations, how it is tested, and worked answers to practice questions Q1, Q2, Q3, Q4, Q5, Q7 |
+| `topic-b-qualitative-methods-analysis.html` | Topic B: Qualitative Methods & Analysis. Characteristics of qualitative research, interviews vs focus groups, trustworthiness criteria, seven analysis options, thematic analysis (6 steps) and content analysis, with worked answers to Q8–Q13 |
 | `topic-c-quantitative-methods-analysis.html` | Topic C: Quantitative Methods & Analysis. Choosing quantitative, questionnaire/Likert design, basic statistics, t-test, ANOVA, correlation, regression, PCA and factor analysis, with worked answers to Q6 and Q14–Q20 |
 
 Each revision page has a "Cover definitions" self-test mode, show/hide model answers, flashcards, a one-page memory sheet and print-to-PDF.
