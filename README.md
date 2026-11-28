@@ -21,6 +21,7 @@ Drawings, sticky notes and edited speaker notes are saved in your own browser on
 | `index.html` | Open lecture: final exam overview |
 | `topic-a-research-design-ethics.html` | Topic A: Research Design & Ethics + Qualitative vs Quantitative. Lecture definitions, plain-language explanations, how it is tested, and worked answers to practice questions Q1, Q2, Q3, Q4, Q5, Q7 |
 | `topic-b-qualitative-methods-analysis.html` | Topic B: Qualitative Methods & Analysis. Characteristics of qualitative research, interviews vs focus groups, trustworthiness criteria, seven analysis options, thematic analysis (6 steps) and content analysis, with worked answers to Q8–Q13 |
+| `cheat-sheet.html` | Printable 4-page A4 exam cheat sheet: key points for all three topics, mnemonics, must-know numbers, and a one-line answer plan for each of the 20 practice questions |
 | `mock-exam.html` | Full mock exam: 4 questions × 25%, 2 hours, closed book, with exam timer, mark guides, workings and model answers |
 | `topic-c-quantitative-methods-analysis.html` | Topic C: Quantitative Methods & Analysis. Choosing quantitative, questionnaire/Likert design, basic statistics, t-test, ANOVA, correlation, regression, PCA and factor analysis, with worked answers to Q6 and Q14–Q20 |
 
